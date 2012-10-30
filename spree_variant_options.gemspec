@@ -18,17 +18,21 @@ Gem::Specification.new do |s|
   s.test_files    = `git ls-files -- {test,spec,features}/*`.split("\n")
   s.executables   = `git ls-files -- bin/*`.split("\n").map{ |f| File.basename(f) }
   s.require_paths = ["lib"]
-  
+
   # Runtime
-  s.add_dependency('spree_core', '>= 1.0.0')
-  
+  s.add_dependency('spree_core', '~> 1.1.1')
+
   # Development
-  s.add_development_dependency('spree_sample',     '>= 1.0.0')
-  s.add_development_dependency('dummier',          '>= 0.3.0')
-  s.add_development_dependency('shoulda',          '>= 3.0.0.beta2')
-  s.add_development_dependency('factory_girl',     '>= 2.3.2')
-  s.add_development_dependency('cucumber-rails',   '>= 1.2.1')
-  s.add_development_dependency('database_cleaner', '>= 0.6.7')
-  s.add_development_dependency('sqlite3',          '>= 1.3.4')
+  s.add_development_dependency('spree_sample',     '~> 1.1.1')
+  s.add_development_dependency('dummier',          '~> 0.3')
+  s.add_development_dependency('shoulda',          '~> 3.0')
+  s.add_development_dependency('factory_girl',     '~> 2.3')
+  s.add_development_dependency('cucumber-rails',   '~> 1.2')
+  s.add_development_dependency('database_cleaner', '~> 0.6')
+  s.add_development_dependency('sqlite3',          '~> 1.3')
+  s.add_development_dependency('capybara')
+  s.add_development_dependency('launchy')
+  s.add_development_dependency('database_cleaner')
+  # s.add_development_dependency('debugger')
 
 end

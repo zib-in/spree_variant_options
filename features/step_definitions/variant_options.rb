@@ -21,8 +21,10 @@ end
 # Givens
 
 Given /^I( don't)? allow backorders$/ do |dont|
+  Spree::Config.instance_variable_set("@configuration", nil)
+  Spree::Config.set(:track_inventory_levels => true)
   Spree::Config.set(:allow_backorders => dont.nil?)
-  assert_equal dont.nil?, Spree::Config[:allow_backorders]
+  assert_equal dont.nil?, !!Spree::Config[:allow_backorders]
 end
 
 Given /^I have a product( with variants)?( and images)?$/ do |has_variants, has_images|
@@ -33,7 +35,7 @@ Given /^I have a product( with variants)?( and images)?$/ do |has_variants, has_
       @product.variants.each do |v|
         v.images.create(:attachment => random_image, :alt => v.sku)
       end
-    end   
+    end
   end
 end
 
@@ -46,28 +48,36 @@ Then /^I should see image "([^"]*)" within the first option value$/ do |source|
   ot = @product.option_types.first
   ov = ot.option_values.first
   within ".variant-options a[rel='#{ot.id}-#{ov.id}']" do
-    assert_match "/system/images/#{ov.id}/small/#{source}", find("img").native.attribute("src")
+    assert_match "/spree/option_values/#{ov.id}/small/#{source}", find("img").native.attribute("src")
   end
 end
 
 Given /^the "([^"]*)" variant is out of stock$/ do |descriptor|
   flunk unless @product
   @variant = variant_by_descriptor(descriptor)
-  @variant.update_attributes(:count_on_hand => 0)
+  @variant.update_attribute(:count_on_hand, 0)
+end
+
+Given /^all the variants are out of stock$/ do
+  @product.variants.update_all(:count_on_hand => 0)
 end
 
 Given /^I have an? "([^"]*)" variant( for .*)?$/ do |descriptor, price|
   price = price ? price.gsub(/[^\d\.]/, '').to_f : 10.00
-  values = descriptor.split(" ")
-  flunk unless @product && values.length == @product.option_types.length
-  @variant = variant_by_descriptor(descriptor)
-  return @variant if @variant
-  @product.option_type_ids.each_with_index do |otid, index|
-    word = values[index]
-    val = Spree::OptionValue.find_by_presentation(word) || Factory.create(:option_value, :option_type_id => otid, :presentation => word, :name => word.downcase) 
-    values[index] = val
+  if descriptor == "master"
+    @product.master.update_attributes(:price => price)
+  else
+    values = descriptor.split(" ")
+    flunk unless @product && values.length == @product.option_types.length
+    @variant = variant_by_descriptor(descriptor)
+    return @variant if @variant
+    @product.option_type_ids.each_with_index do |otid, index|
+      word = values[index]
+      val = Spree::OptionValue.find_by_presentation(word) || Factory.create(:option_value, :option_type_id => otid, :presentation => word, :name => word.downcase)
+      values[index] = val
+    end
+    @variant = Factory.create(:variant, :product => @product, :option_values => values, :price => price)
   end
-  @variant = Factory.create(:variant, :product => @product, :option_values => values, :price => price)
   @product.reload
 end
 
@@ -88,8 +98,15 @@ end
 #===============================
 # Thens
 
+Then /show me the page/ do
+  save_and_open_page
+end
+
 Then /^the source should contain the options hash$/ do
-  assert source.include?("VariantOptions(#{@product.variant_options_hash.to_json}, #{Spree::Config[:allow_backorders]})")
+  assert source.include?("options: #{@product.variant_options_hash.to_json}")
+  assert source.include?("track_inventory_levels: #{!!Spree::Config[:track_inventory_levels]}")
+  assert source.include?("allow_backorders: #{!!Spree::Config[:allow_backorders]}")
+  assert source.include?("allow_select_outofstock: #{!!SpreeVariantOptions::VariantConfig[:allow_select_outofstock]}")
 end
 
 Then /^I should see (enabled|disabled)+ links for the ((?!option).*) option type$/ do |state, option_type|
@@ -99,16 +116,16 @@ Then /^I should see (enabled|disabled)+ links for the ((?!option).*) option type
     when "second"; @product.option_types[1];
     when "last";   @product.option_types.last;
   end
-  assert_seen option_type.presentation, :within => "#spree_option_type_#{option_type.id} h6.variant-option-type"
+  assert_seen option_type.presentation, :within => "#option_type_#{option_type.id} h6.variant-option-type"
   option_type.option_values.each do |value|
     rel = "#{option_type.id}-#{value.id}"
-    link = find("#spree_option_type_#{option_type.id} a[rel='#{option_type.id}-#{value.id}']")
+    link = find("#option_type_#{option_type.id} a[rel='#{option_type.id}-#{value.id}']")
     assert_not_nil link
     assert_equal value.presentation, link.text
     assert_equal "#", link.native.attribute('href').last
     assert_equal "option-value #{enabled ? 'in-stock' : 'locked'}", link.native.attribute('class')
     assert_equal rel, link.native.attribute('rel') # obviously!
-  end  
+  end
 end
 
 Then /^I should have a hidden input for the selected variant$/ do
