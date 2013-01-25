@@ -27,10 +27,10 @@ class ProductTest < ActionDispatch::IntegrationTest
       @m = Factory(:option_value, :presentation => "M", :option_type => @size)
       @red = Factory(:option_value, :name => "Color", :presentation => "Red", :option_type => @color)
       @green = Factory(:option_value, :name => "Color", :presentation => "Green", :option_type => @color)
-      @variant1 = Factory(:variant, :product => @product, :option_values => [@s, @red], :on_hand => 0)
+      @variant1 = Factory(:variant, :product => @product, :price => 32.99, :option_values => [@s, @red], :on_hand => 0)
       @variant2 = Factory(:variant, :product => @product, :option_values => [@s, @green], :on_hand => 0)
       @variant3 = Factory(:variant, :product => @product, :option_values => [@m, @red], :on_hand => 0)
-      @variant4 = Factory(:variant, :product => @product, :option_values => [@m, @green], :on_hand => 1)
+      @variant4 = Factory(:variant, :product => @product, :price => 35.99, :option_values => [@m, @green], :on_hand => 1)
 
       Deface::Override.new( :virtual_path => "spree/products/show",
       :name => "add_other_form_to_spree_variant_options",
@@ -125,6 +125,28 @@ class ProductTest < ActionDispatch::IntegrationTest
       within("span.price.selling") do
         assert page.has_content?("$35.99")
       end
+    end
+
+    should 'allow choose on demand' do
+      @variant1.update_attribute :on_demand, true
+
+      visit spree.product_path(@product)
+
+      within("#product-variants") do
+        size = find_link('S')
+        size.click
+        assert size["class"].include?("selected")
+        color = find_link('Red')
+        color.click
+        assert color["class"].include?("selected")
+      end
+
+      # add to cart button is enabled
+      assert_nil find_button("Add To Cart")["disabled"]
+      within("span.price.selling") do
+        assert page.has_content?("$32.99")
+      end
+
     end
 
     def teardown
