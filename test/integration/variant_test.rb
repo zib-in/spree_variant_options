@@ -41,7 +41,9 @@ class ProductTest < ActionDispatch::IntegrationTest
 
     should 'disallow choose out of stock variants' do
 
-      SpreeVariantOptions::VariantConfig.allow_select_outofstock = false
+      reset_spree_variant_options_preferences do |config|
+        config.allow_select_outofstock = false
+      end
 
       visit spree.product_path(@product)
 
@@ -62,15 +64,23 @@ class ProductTest < ActionDispatch::IntegrationTest
     end
 
     should 'allow choose out of stock variants' do
-      SpreeVariantOptions::VariantConfig.allow_select_outofstock = true
+      reset_spree_variant_options_preferences do |config|
+        config.allow_select_outofstock = true
+      end
 
       visit spree.product_path(@product)
 
       # variant options are selectable
       within("#product-variants") do
+        size = find_link('M')
+        size.click
+        assert size["class"].include?("selected")
+
         size = find_link('S')
         size.click
         assert size["class"].include?("selected")
+
+
         color = find_link('Green')
         color.click
         assert color["class"].include?("selected")
@@ -78,7 +88,8 @@ class ProductTest < ActionDispatch::IntegrationTest
       # add to cart button is still disabled
       assert_equal "true", find_button("Add To Cart")["disabled"]
       # add to wishlist button is enabled
-      assert_equal "false", find_button("Add To Wishlist")["disabled"]
+
+      assert_nil find_button("Add To Wishlist")["disabled"]
     end
 
     should "choose in stock variant" do
@@ -92,9 +103,9 @@ class ProductTest < ActionDispatch::IntegrationTest
         assert color["class"].include?("selected")
       end
       # add to cart button is enabled
-      assert_equal "false", find_button("Add To Cart")["disabled"]
+      assert_nil find_button("Add To Cart")["disabled"]
       # add to wishlist button is enabled
-      assert_equal "false", find_button("Add To Wishlist")["disabled"]
+      assert_nil find_button("Add To Wishlist")["disabled"]
     end
 
     should "should select first instock variant when default_instock is true" do
@@ -110,7 +121,7 @@ class ProductTest < ActionDispatch::IntegrationTest
       end
 
       # add to cart button is enabled
-      assert_equal "false", find_button("Add To Cart")["disabled"]
+      assert_nil find_button("Add To Cart")["disabled"]
       within("span.price.selling") do
         assert page.has_content?("$35.99")
       end
@@ -153,9 +164,9 @@ class ProductTest < ActionDispatch::IntegrationTest
         assert color["class"].include?("selected")
       end
       # add to cart button is enabled
-      assert_equal "false", find_button("Add To Cart")["disabled"]
+      assert_nil find_button("Add To Cart")["disabled"]
       # add to wishlist button is enabled
-      assert_equal "false", find_button("Add To Wishlist")["disabled"]
+      assert_nil find_button("Add To Wishlist")["disabled"]
     end
   end
 end
