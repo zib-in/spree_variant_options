@@ -9,14 +9,14 @@ Spree::Product.class_eval do
   end
 
   def variants_for_option_value(value)
-    @_variant_option_values ||= option_values
+    @_variant_option_values ||= variants.includes(:option_values).order_by_positions
     @_variant_option_values.select { |i| i.option_value_ids.include?(value.id) }
   end
 
   def variant_options_hash
     return @_variant_options_hash if @_variant_options_hash
     hash = {}
-    variants.includes(:option_values).each do |variant|
+    variants.includes(:option_values).order_by_positions.each do |variant|
       variant.option_values.each do |ov|
         otid = ov.option_type_id.to_s
         ovid = ov.id.to_s

@@ -65,7 +65,7 @@ class Spree::OptionValueTest < ActiveSupport::TestCase
     end
 
     should "retain option type order by position" do
-      assert_equal [1, 1, 1, 1, 2, 2, 2, 2, 2, 2 ,2 ,2], Spree::OptionValue.for_product(@product).map(&:option_type_id)
+      assert_equal [1, 1, 1, 1, 2, 2, 2, 2, 2, 2 ,2 ,2], Spree::OptionValue.for_product(@product).order_by_positions.map(&:option_type_id)
     end
 
     should "return empty array when no variants" do
