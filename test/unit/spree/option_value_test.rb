@@ -64,14 +64,8 @@ class Spree::OptionValueTest < ActiveSupport::TestCase
       assert !Spree::OptionValue.for_product(@product).include?(unused)
     end
 
-    should "retain option values sort order" do
-      @unordered, @prev_position = false, 0
-      Spree::OptionValue.for_product(@product).all.each do |ov|
-        @unordered = true if @prev_position > ov.position
-        @prev_position = ov.position
-      end
-
-      assert !@unordered
+    should "retain option type order by position" do
+      assert_equal [1, 1, 1, 1, 2, 2, 2, 2, 2, 2 ,2 ,2], Spree::OptionValue.for_product(@product).map(&:option_type_id)
     end
 
     should "return empty array when no variants" do

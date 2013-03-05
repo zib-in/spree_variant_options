@@ -149,6 +149,39 @@ class ProductTest < ActionDispatch::IntegrationTest
 
     end
 
+    should 'allow to choose on demand even with 3 option types' do
+      @access = Factory(:option_type, :name => "Accessory")
+      @tie = Factory(:option_value, :presentation => "Tie", :option_type => @access)
+      @belt = Factory(:option_value, :presentation => "Belt", :option_type => @access)
+      @product.variants.destroy_all
+      @variant1 = Factory(:variant, :product => @product, :price => 32.99, :option_values => [@s, @red, @belt], :on_demand => true)
+      @variant2 = Factory(:variant, :product => @product, :price => 32.99, :option_values => [@m, @red, @belt], :on_demand => false, :on_hand => 0)
+      @variant3 = Factory(:variant, :product => @product, :price => 32.99, :option_values => [@s, @red, @tie], :on_demand => false, :on_hand => 0)
+      @variant4 = Factory(:variant, :product => @product, :price => 32.99, :option_values => [@m, @red, @tie], :on_demand => true)
+      @variant5 = Factory(:variant, :product => @product, :price => 32.99, :option_values => [@s, @green, @belt], :on_demand => true)
+      @variant6 = Factory(:variant, :product => @product, :price => 32.99, :option_values => [@m, @green, @belt], :on_demand => false, :on_hand => 0)
+      @variant7 = Factory(:variant, :product => @product, :price => 32.99, :option_values => [@s, @green, @tie], :on_demand => false, :on_hand => 0)
+      @variant8 = Factory(:variant, :product => @product, :price => 32.99, :option_values => [@m, @green, @tie], :on_demand => true)
+
+      visit spree.product_path(@product)
+
+      within("#product-variants") do
+        debugger
+        size = find_link('M')
+        size.click
+        assert size["class"].include?("selected")
+        color = find_link('Red')
+        color.click
+        assert color["class"].include?("selected")
+        access = find_link('Tie')
+        access.click
+        assert access["class"].include?("selected")
+      end
+
+      # add to cart button is enabled
+      assert_nil find_button("Add To Cart")["disabled"]
+    end
+
     def teardown
       # reset preferences to default values
       SpreeVariantOptions::VariantConfig.allow_select_outofstock = false
