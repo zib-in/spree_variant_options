@@ -111,7 +111,9 @@ function VariantOptions(params) {
       } else if (allow_backorders) {
         $(element).addClass('in-stock');
       } else {
-        $.each(variants, function(key, value) { count += value.count });
+        $.each(variants, function(key, value) {
+          count += value.on_demand ? 1 : value.count
+        });
         $(element).addClass(count ? 'in-stock' : 'out-of-stock');
       }
     });
