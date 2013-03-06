@@ -4,7 +4,7 @@
     <% index = 0 %>
     <% @product.grouped_option_values.each do |type, values| %>
       <div id="<%= dom_id(type) %>" class="variant-options index-<%= index %>">
-        <h6 class="variant-option-type"><%= type.presentation %></h6>
+        <h6 class="variant-option-type"><%= label_tag 'option-value-name', t(:select_a, :index => index + 1, :name => type.presentation.downcase) %> <strong class='selection'></strong></h6>
         <ul class="variant-option-values">
         <% values.sort_by(&:position).each do |value| %>
           <% classes = ["option-value"] %>

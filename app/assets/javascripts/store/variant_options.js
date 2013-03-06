@@ -151,9 +151,11 @@ function VariantOptions(params) {
   }
 
   function to_f(string) {
-    return parseFloat(string.replace(/[^\d\.]/g, ''));
+    return string ? parseFloat(string.replace(/[^\d\.]/g, '')) : 0;
   }
 
+  // Find matching variants for selected option value
+  // Set price or price range if matching variants have different prices.
   function find_variant() {
     var selected = divs.find('a.selected');
     var variants = get_variant_objects(selected.get(0).rel);
@@ -206,6 +208,7 @@ function VariantOptions(params) {
       disable($(element).find('a.option-value').show().removeClass('in-stock out-of-stock').addClass('locked').unbind('click'));
       $(element).find('a.clear-button').hide();
     });
+    parent.find('strong.selection').html('');
     show_all_variant_images();
   }
 
@@ -227,11 +230,19 @@ function VariantOptions(params) {
     var a = enable(a.addClass('selected'));
     parent.find('a.clear-button').css('display', 'block');
     advance();
+    handle_selected();
     if (find_variant()) {
       toggle();
     }
   }
 
+  function handle_selected() {
+    var selected = divs.find('a.selected');
+    selected.each(function(){
+      $this = $(this)
+      $this.parents('.variant-options').find('h6 strong.selection').html($this.attr('title'))
+    });
+  };
   $(document).ready(init);
 
 };
