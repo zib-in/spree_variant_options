@@ -208,9 +208,9 @@ function VariantOptions(params) {
     parent.nextAll().each(function(index, element) {
       disable($(element).find('a.option-value').show().removeClass('in-stock out-of-stock').addClass('locked').unbind('click'));
       $(element).find('a.clear-button').hide();
-      $(element).find('h6 strong.selection').html('');
+      $(element).find('h6 strong.selection').html('').removeClass('out-of-stock');
     });
-    parent.find('strong.selection').html('');
+    parent.find('strong.selection').html('').removeClass('out-of-stock');
     show_all_variant_images();
   }
 
