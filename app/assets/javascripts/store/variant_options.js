@@ -33,6 +33,7 @@ if (!Array.find_matches) Array.find_matches = function(a) {
 function VariantOptions(params) {
 
   var options = params['options'];
+  var i18n = params['i18n'];
   var allow_backorders = !params['track_inventory_levels'] ||  params['allow_backorders'];
   var allow_select_outofstock = params['allow_select_outofstock'];
   var default_instock = params['default_instock'];
@@ -241,7 +242,11 @@ function VariantOptions(params) {
     var selected = divs.find('a.selected');
     selected.each(function(){
       $this = $(this)
-      $this.parents('.variant-options').find('h6 strong.selection').html($this.attr('title'))
+      var selection = $this.parents('.variant-options').find('h6 strong.selection')
+      selection.html($this.attr('title'));
+
+      if ($this.hasClass('out-of-stock'))
+        selection.addClass('out-of-stock').attr('title', i18n.out_of_stock);
     });
   };
   $(document).ready(init);
