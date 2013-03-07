@@ -49,7 +49,7 @@ function VariantOptions(params) {
     update();
     enable(parent.find('a.option-value'));
     toggle();
-    $('.clear-option a.clear-button').hide().click(handle_clear);
+    $('div.variant-options a.clear-button').hide().click(handle_clear);
 
     if (default_instock) {
       divs.each(function(){
@@ -230,7 +230,7 @@ function VariantOptions(params) {
     }
     disable(buttons);
     var a = enable(a.addClass('selected'));
-    parent.find('a.clear-button').css('display', 'block');
+    parent.find('a.clear-button').css('display', 'inline-block');
     advance();
     handle_selected();
     if (find_variant()) {
