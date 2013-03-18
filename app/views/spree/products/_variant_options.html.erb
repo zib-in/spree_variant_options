@@ -10,7 +10,7 @@
           <%= link_to "", "#clear", :class => "icon-remove clear-button clear-index-#{index}" %>
         </h6>
 
-        <ul class="variant-option-values">
+        <ul class="variant-option-values" class='inline'>
         <% values.sort_by(&:position).each do |value| %>
           <% classes = ["option-value"] %>
           <% unless (variants = @product.variants_for_option_value(value)).empty? %>
