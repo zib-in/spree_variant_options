@@ -13,7 +13,7 @@ Spree::OptionValue.class_eval do
   end
 
   scope :for_product, lambda { |product|
-    select('spree_option_values.*, spree_option_types.*').uniq.where("spree_option_values_variants.variant_id IN (?)", product.variant_ids)
+    select('spree_option_values.*, spree_option_types.position').uniq.where("spree_option_values_variants.variant_id IN (?)", product.variant_ids)
     .joins(:variants).order_by_positions
   }
 
